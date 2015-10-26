@@ -21,8 +21,6 @@ var onReplied = function(err, tweet) {
 }
 
 var sendReply = function(tweet) {
-	if (tweet.user.id_str != "4004149833") { return; }
-
 	var users = tweet.entities.user_mentions.map(function(user) {
 		return user.screen_name;
 	});
@@ -42,7 +40,7 @@ var sendReply = function(tweet) {
 
 var onTweet = function(tweet) {
 	if (tweet.limit) {
-		console.log("!!! Limit message:", tweet.limit.track);
+		console.log("!!! Tracking limit:", tweet.limit.track);
 		return;
 	}
 

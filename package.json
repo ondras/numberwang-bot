@@ -1,1 +1,16 @@
-{}
+{
+  "name": "numberwang-bot",
+  "version": "0.0.0",
+  "keywords": [
+    "twitter",
+    "numberwang"
+  ],
+  "homepage": "https://github.com/ondras/numberwang-bot",
+  "author": {
+    "name": "Ondřej Žára",
+    "email": "ondrej.zara@gmail.com"
+  },
+  "dependencies": {
+    "twitter": "^1.2.5"
+  }
+}
