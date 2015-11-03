@@ -1,4 +1,3 @@
-var stats = require("./stats");
 var Twitter = require("twitter");
 
 var client = new Twitter({
@@ -8,24 +7,30 @@ var client = new Twitter({
 	access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
 });
 
-var tokens = ["54", "47"];
+var DELAY = 5*60*1000;
+var tokens = ["54", "47", "4"];
 var splitRE = /\s+/;
+var recentlyReplied = {};
 
-var onReplied = function(err, tweet) {
+function onError(error, response) {
+	console.error("!!!", error, response.headers);
+}
+
+function onReplied(err, tweet, response) {
 	if (err) { 
-		onError(err);
+		onError(err, response);
 	} else {
-		stats.addReply();
 		console.log("Successfully sent tweet", tweet.id_str);
 	}
 }
 
-var sendReply = function(tweet) {
+function sendReply(tweet) {
 	var users = tweet.entities.user_mentions.map(function(user) {
 		return user.screen_name;
 	});
 
 	var name = tweet.user.screen_name;
+	recentlyReplied[name] = 1;
 	if (users.indexOf(name) == -1) { users.unshift(name); }
 
 	var text = "That's Numberwang! https://www.youtube.com/watch?v=qjOZtWZ56lc";
@@ -38,13 +43,9 @@ var sendReply = function(tweet) {
 	client.post("statuses/update", data, onReplied);
 }
 
-var onTweet = function(tweet) {
-	if (tweet.limit) {
-		console.log("!!! Tracking limit:", tweet.limit.track);
-		return;
-	}
-
-	stats.addTweet();
+function testTweet(tweet) {
+	if (tweet.retweeted_status) { return false; }
+	if (tweet.user.screen_name in recentlyReplied) { return false; }
 
 	var words = tweet.text.split(splitRE);
 	for (var i=0;i<words.length;i++) {
@@ -53,18 +54,42 @@ var onTweet = function(tweet) {
 		if (ch == "@" || ch == "#") { continue; } // mentions, hashtags are okay
 		if (tokens.indexOf(word.toLowerCase()) > -1) { continue; } // found token
 
-		return; // anything else => filter out
+		return false; // anything else => filter out
 	}
 
-	sendReply(tweet);
+	return true;
 }
 
-var onError = function(error) {
-	stats.addError();
-	console.error("!!!", error);
+function onTweets(tweets) {
+	available = tweets.filter(testTweet);
+	console.log("Search found", tweets.length, "tweets,", available.length, "of them passed the filter");
+	if (available.length) { sendReply(available[0]); }
 }
 
-client.stream("statuses/filter", {track:tokens.join(","), filter_level:"none"}, function(stream) {
-	stream.on("data", onTweet);
-	stream.on("error", onError);
+function search() {
+	var hours = new Date().getHours();
+
+	if (hours >= 6) {
+		client.get("search/tweets", {q:tokens.join(" OR "), result_type:"recent", count:"100"}, function(err, data, response) {
+			if (err) {
+				onError(err, response);
+			} else {
+				onTweets(data.statuses);
+			}
+		});
+	}
+
+	setTimeout(search, DELAY);
+}
+
+client.get("statuses/home_timeline", {count:"100", trim_user:"true", include_entities:"false"}, function(err, data, response) {
+	if (err) {
+		onError(err, response);
+	} else {
+		data.forEach(function(tweet) {
+			recentlyReplied[tweet.in_reply_to_screen_name] = 1;
+		});
+		console.log("Recently replied to", Object.keys(recentlyReplied).length, "users");
+		search();
+	}
 });
