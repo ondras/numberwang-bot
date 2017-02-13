@@ -11,6 +11,6 @@
     "email": "ondrej.zara@gmail.com"
   },
   "dependencies": {
-    "twitter": "^1.2.5"
+    "twitter": "^1.7.0"
   }
 }
