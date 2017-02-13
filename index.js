@@ -33,6 +33,7 @@ function sendReply(tweet) {
 
 function testWord(word) {
 	return (TOKENS.indexOf(word.toLowerCase()) > -1);
+}
 
 function isRegularWord(word) {
 	let ch = word.charAt(0);
