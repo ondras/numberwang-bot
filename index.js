@@ -1,9 +1,10 @@
 "use strict";
 
-const DELAY = 5*60*1000;
-const TOKENS = ["54", "47", "4"];
+const TOKENS = [/*"54", "47", "4"*/ "this-is-test"];
 const SPLIT = /\s+/;
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=qjOZtWZ56lc";
+const SEARCH_DELAY = 5*60*1000; // for periodic searches
+const SEND_DELAY = 10*1000;     // for stream-based quoting
 
 const Twitter = require("twitter");
 let client = new Twitter({
@@ -22,7 +23,7 @@ function sendReply(tweet) {
 
 	let attachment_url = `https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`
 	let params = {
-		status: `That's Numberwang! ${YOUTUBE_URL} ${attachment_url}`,
+		status: `That's Numberwang! ${YOUTUBE_URL}#${Math.random()}`,
 		attachment_url
 	}
 	client.post("statuses/update", params).then(
@@ -67,19 +68,18 @@ function search() {
 		client.get("search/tweets", params).then(data => onTweets(data.statuses), console.error);
 	}
 
-	setTimeout(search, DELAY);
+	setTimeout(search, SEARCH_DELAY);
 }
 
-//client.get('statuses/show/831209957257273345', {}).then(console.log);
-
-
-search();
-/*
-let stream = client.stream('statuses/filter', {track: TOKENS.join(",")})
-stream.on("data", tweet => {
-	if (!tweet.text) { return; }
-	if (!testTweet(tweet)) { return; }
-	sendReply(tweet);
-});
-stream.on("error", console.error);
-*/
+if (SEARCH_DELAY > 0) {
+	search();
+} else {
+	console.log("Opening search stream");
+	let stream = client.stream('statuses/filter', {track: TOKENS.join(",")})
+	stream.on("data", tweet => {
+		if (!tweet.text) { return; }
+		if (!testTweet(tweet)) { return; }
+		setTimeout(() => sendReply(tweet), SEND_DELAY);
+	});
+	stream.on("error", console.error);
+}
