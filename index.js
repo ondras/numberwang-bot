@@ -46,7 +46,7 @@ function testTweet(tweet) {
 	let words = tweet.text.split(SPLIT);
 	let regular = words.filter(isRegularWord);
 
-	return regular.every(testWord);
+	return regular.length > 0 && regular.every(testWord);
 }
 
 function onTweets(tweets) {
@@ -69,6 +69,9 @@ function search() {
 
 	setTimeout(search, DELAY);
 }
+
+//client.get('statuses/show/831209957257273345', {}).then(console.log);
+
 
 search();
 /*
