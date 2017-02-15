@@ -1,6 +1,6 @@
 "use strict";
 
-const TOKENS = [/*"54", "47", "4"*/ "this-is-test"];
+const TOKENS = ["54", "47", "4"];
 const SPLIT = /\s+/;
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=qjOZtWZ56lc";
 const SEARCH_DELAY = 5*60*1000; // for periodic searches
