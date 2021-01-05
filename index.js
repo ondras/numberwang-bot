@@ -2,7 +2,7 @@
 
 const TOKENS = ["54", "47", "4"];
 const SPLIT = /\s+/;
-const YOUTUBE_URL = "https://www.youtube.com/watch?v=qjOZtWZ56lc";
+const YOUTUBE_URL = "https://www.youtube.com/watch?v=ZH-cXBhkl-E";
 const SEARCH_DELAY = 5*60*1000; // for periodic searches
 const SEND_DELAY = 10*1000;     // for stream-based quoting
 
